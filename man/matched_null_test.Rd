@@ -2,14 +2,17 @@
 % Please edit documentation in R/matched_null_test.R
 \name{matched_null_test}
 \alias{matched_null_test}
-\title{Test a cluster count against Gaussian-copula matched nulls}
+\title{Test a cluster count against matched nulls}
 \usage{
 matched_null_test(
   x,
   cluster_fn,
   R = 200,
   probs = c(0.025, 0.975),
-  ridge = 1e-06
+  copula = c("gaussian", "t"),
+  df = 8,
+  ridge = 1e-06,
+  parallel = FALSE
 )
 }
 \arguments{
@@ -24,14 +27,30 @@ clusters (but any scalar summary of clustering strength works).}
 \item{probs}{Lower and upper quantiles of the null distribution used for
 the interval verdict (default \code{c(.025, .975)}).}
 
+\item{copula, df}{Dependence family of the twins and t degrees of freedom,
+passed to \code{\link[=copula_null]{copula_null()}}. Defaults to \code{"gaussian"}, which is the null of
+the method; \code{copula = "t"} adds a second, tighter null rather than
+substituting for it, and \code{df} is fixed by the caller, never estimated from
+the data.}
+
 \item{ridge}{Passed to \code{\link[=copula_null]{copula_null()}}.}
+
+\item{parallel}{Evaluate the twin loop through \pkg{future.apply}, so that the
+backend is whatever \code{future::plan()} the caller has set. Because the twins
+are independent and the null construction itself is a negligible share of
+the cost, the speed-up is close to the cost of the user's own pipeline
+divided by the number of workers. Seeded results are reproducible and do
+not depend on how many workers run them. They do, however, differ from the
+\code{parallel = FALSE} stream, which is left byte-identical to earlier versions,
+so a seeded analysis should not switch settings partway through.}
 }
 \value{
 An object of class \code{"matched_null_test"}: a list with the real
 statistic (\code{real}), the null draws (\code{null}), the null interval
 (\code{interval}), a one-sided Monte Carlo p-value for exceedance
-(\code{p_exceed}), and the interval verdict (\code{within}). Reproducibility is the
-caller's: set a seed before calling.
+(\code{p_exceed}), the interval verdict (\code{within}), and the null family used
+(\code{copula}, with \code{df} when it is \code{"t"}). Reproducibility is the caller's:
+set a seed before calling.
 }
 \description{
 Runs the user's own clustering pipeline on the real data and on \code{R}
@@ -42,6 +61,16 @@ supplied as a function, so any procedure that returns a number, a
 BIC-selected mixture, a k-means heuristic, a published typology's own
 workflow, can be tested unchanged.
 }
+\details{
+A verdict of "exceeds the null" under the default Gaussian twins licenses
+only "structure beyond margins and correlations", it does not by itself
+license types: heavy-tailed dependence also exceeds a Gaussian null. To
+separate the two, rerun with \code{copula = "t"} (df 8, then 3). A result that
+survives the t twins as well is harder to attribute to tails; a result the
+t twins reproduce was tail dependence, not types. The Gaussian run remains
+the test, and a result quoted without its Gaussian verdict is not a
+matched-null result.
+}
 \examples{
 \donttest{
 if (requireNamespace("mclust", quietly = TRUE)) {
@@ -51,6 +80,9 @@ if (requireNamespace("mclust", quietly = TRUE)) {
   set.seed(42)
   x <- matrix(rnorm(500 * 4), 500, 4)  # typeless data
   matched_null_test(x, pick_k, R = 30)
+
+  # stress test of an exceedance verdict against heavier tails:
+  # matched_null_test(x, pick_k, R = 30, copula = "t", df = 8)
 }
 }
 

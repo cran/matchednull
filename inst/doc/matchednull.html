@@ -391,7 +391,7 @@ the real answer stands out.</p>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co"># 1. Typeless data: the test should stay quiet.</span></span>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7</span>)</span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">matched_null_test</span>(x, pick_k, <span class="at">R =</span> <span class="dv">30</span>)</span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; Matched-null test (30 null twins)</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; Matched-null test (30 Gaussian null twins)</span></span>
 <span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt;   real statistic:      1</span></span>
 <span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt;   null interval:       [1, 1]</span></span>
 <span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt;   p (real &gt;= nulls):   1</span></span>
@@ -410,7 +410,7 @@ the real answer stands out.</p>
 <span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a></span>
 <span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7</span>)</span>
 <span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="fu">matched_null_test</span>(X, pick_k, <span class="at">R =</span> <span class="dv">30</span>)</span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; Matched-null test (30 null twins)</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; Matched-null test (30 Gaussian null twins)</span></span>
 <span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt;   real statistic:      2</span></span>
 <span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt;   null interval:       [1, 1]</span></span>
 <span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt;   p (real &gt;= nulls):   0.032</span></span>
@@ -437,6 +437,45 @@ margins for pronounced multimodality before relying on the count test,
 and tie-break granular (Likert-type) scales before formal unimodality
 tests.</li>
 </ul>
+</div>
+<div id="stress-testing-an-exceedance-heavier-tails" class="section level2">
+<h2>Stress-testing an exceedance: heavier tails</h2>
+<p>“Exceeds the null” under Gaussian twins licenses only <em>structure
+beyond margins and correlations</em>, not types. Heavy-tailed
+dependence, where extreme values across variables arrive together, also
+exceeds a Gaussian null, and real questionnaire and clinical data are
+heavy-tailed more often than not. To separate the two readings, rerun
+the test with t-copula twins: same margins, same correlations, but tails
+that co-move.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">matched_null_test</span>(x, pick_k, <span class="at">R =</span> <span class="dv">200</span>, <span class="at">copula =</span> <span class="st">&quot;t&quot;</span>, <span class="at">df =</span> <span class="dv">8</span>)  <span class="co"># moderate tails</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">matched_null_test</span>(x, pick_k, <span class="at">R =</span> <span class="dv">200</span>, <span class="at">copula =</span> <span class="st">&quot;t&quot;</span>, <span class="at">df =</span> <span class="dv">3</span>)  <span class="co"># heavy tails</span></span></code></pre></div>
+<p>The Gaussian twins remain the test. A t copula could not take that
+role, since it would absorb into the null the tail structure the test is
+meant to detect, and that is exactly what makes it useful as a second,
+deliberately blinded null: an exceedance that survives twins which have
+already matched tail co-movement away cannot be attributed to tail
+co-movement. Run this rung only on an exceedance the Gaussian run has
+already licensed; if the Gaussian twins were not exceeded, the count is
+what margins and correlations alone produce and the question does not
+arise. <code>df</code> is set by you and never estimated from the data,
+and both values should be reported rather than the one that suits the
+conclusion. A result quoted without its Gaussian verdict is not a
+matched-null result.</p>
+<p>The ladder reads: a result that exceeds the Gaussian twins
+<em>and</em> the t twins is hard to attribute to tails; a result the t
+twins reproduce was tail dependence, not types. Either way the verdict
+is sharper than what a single null could give. Whether a surviving
+exceedance is <em>categorical</em> is a separate question, answered by
+the taxometric checks rather than by any null.</p>
+</div>
+<div id="going-further" class="section level2">
+<h2>Going further</h2>
+<p>Why the construction works, what the positive controls show, how the
+method relates to earlier reference-distribution tests, and the one
+regime where the test declines to answer are all worked through in the
+<a href="https://haomeng797-ship-it.github.io/matchednull/articles/how-it-works.html">How
+it works</a> article on the package website, which is kept current
+between releases.</p>
 </div>
 <div id="reference" class="section level2">
 <h2>Reference</h2>

@@ -37,3 +37,7 @@ X[z == 2, 3:4] <- X[z == 2, 3:4] %*% L2
 set.seed(7)
 matched_null_test(X, pick_k, R = 30)
 
+## ----eval = FALSE-------------------------------------------------------------
+# matched_null_test(x, pick_k, R = 200, copula = "t", df = 8)  # moderate tails
+# matched_null_test(x, pick_k, R = 200, copula = "t", df = 3)  # heavy tails
+
