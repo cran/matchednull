@@ -11,7 +11,7 @@ x <- matrix(rnorm(400 * 3), 400, 3) %*%
 twin <- copula_null(x)
 
 all(sort(twin[, 1]) == sort(x[, 1]))   # margins: identical
-round(cor(x) - cor(twin), 2)           # correlations: close
+round(cor(x) - cor(twin), 2)           # correlations: close, not exact
 
 ## ----eval = has_mclust--------------------------------------------------------
 suppressPackageStartupMessages(library(mclust))
